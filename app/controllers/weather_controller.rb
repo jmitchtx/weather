@@ -103,18 +103,25 @@ class WeatherController < ApplicationController
     #   "detailedForecast": "Sunny, with a high near 68. Northwest wind 10 to 25 mph, with gusts as high as 35 mph."
     # },
     # parse the startTime to get the date and use that date to get the next 3 days
-
-    periods.select { |p| within_3_days(p) }.map do |period|
+    daytime_periods = periods.select { |p| p["isDaytime"] == true }
+    evening_periods = periods.select { |p| p["isDaytime"] == false }.map do |period|
       {
-        name: period["name"],
-        day: DateTime.parse(period["startTime"]).strftime("%a"),
+        startTime: period["startTime"],
+        low: period["temperature"]
+      }
+    end
+
+    daytime_periods.select { |p| within_3_days(p) }.map do |period|
+      {
+        name: period["name"] == "This Afternoon" ? "Today" : period["name"],
+        day: DateTime.parse(period["startTime"]).strftime("%D"),
         current_temp: period["temperature"],
-        temp_unit: period["temperatureUnit"],
         wind_speed: period["windSpeed"],
         wind_direction: period["windDirection"],
         wind_icon: period["icon"],
         high: period["temperature"],
-        low: period["temperature"],
+        low: low_for_day(period["startTime"], evening_periods),
+        temp_unit: period["temperatureUnit"],
         description: period["shortForecast"]
       }
     end
@@ -123,5 +130,11 @@ class WeatherController < ApplicationController
   def within_3_days(period)
     start_time = DateTime.parse(period["startTime"]).at_beginning_of_day
     start_time <= (DateTime.now + 3)
+  end
+
+  def low_for_day(start_time, evening_periods)
+    evening_periods.find do |period|
+      DateTime.parse(period[:startTime]).at_beginning_of_day == DateTime.parse(start_time).at_beginning_of_day
+    end[:low]
   end
 end

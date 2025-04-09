@@ -10,37 +10,36 @@
     </div>
     <%= form.submit "Get Weather" %>
   <% end %>
+    
+    <br/>
+    <br/>
 
   <% if @weather_data %>
-    <div class="weather-results">
-      <% @weather_data.each do |data| %>
-        <div class="forecast-day">
-          <!-- Day of the week and date -->
-          <div class="day">
-            <%= data[:day] %> <%= data[:date] %>
-          </div>
-          <!-- High/Low Temperature -->
-          <div class="temp">
-            <%= data[:high] %>°/<%= data[:low] %>°
-          </div>
-          <!-- Weather Condition with Icon -->
-          <div class="condition">
-            <img src="<%= data[:weather_icon] %>" alt="Weather Icon" class="weather-icon">
-            <%= data[:description] %>
-          </div>
-          <!-- Precipitation Chance -->
-          <div class="precipitation">
-            <%= data[:precipitation] %>
-          </div>
-          <!-- Wind Speed and Direction with Icon -->
-          <div class="wind">
-            <%= data[:wind_speed] %>
-            <img src="<%= data[:wind_icon] %>" alt="Wind Icon" class="weather-icon">
-            <%= data[:wind_direction] %>
-          </div>
-        </div>
-      <% end %>
-    </div>
+    <table class="weather-results">
+        <% @weather_data.each do |data| %>
+            <tr class="forecast-day">
+                <td class="day">
+                    <%= data[:name] %> 
+                </td>
+                <td class="day">
+                    <%= data[:day] %>
+                </td>
+                <td class="temp">
+                    <b><%= data[:high] %>°</b>/<%= data[:low] %>° <%= data[:temp_unit] %>
+                </td>
+                <td class="wind">
+                    <%= data[:wind_speed] %>
+                    out of <%= data[:wind_direction] %>
+                </td>
+                <td class="wind">
+                    <img src="<%= data[:wind_icon] %>" alt="Wind Icon" class="weather-icon" style="height: 50px; width: 50px;">
+                </td>
+                <td class="precipitation">
+                    <%= data[:description] %>
+                </td>
+            </tr>
+        <% end %>
+    </table>
     <% if @from_cache %>
       <p class="cache-notice">
         * Results from cache (valid for 30 minutes)
