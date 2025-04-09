@@ -2,52 +2,32 @@
 services:
   db:
     image: postgres:15
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    restart: always
     environment:
-      - POSTGRES_DB=weather_app_development
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7
-    restart: always
+      - POSTGRES_DB=weather_app_production
     volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - postgres_data:/var/lib/postgresql/data
+
+  keydb:
+    image: eqalpha/keydb:latest
+    restart: always
+    command: --active-replica yes --multi-master no --port 6379
+    volumes:
+      - keydb_data:/data
 
   web:
-    build: .
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
-    volumes:
-      - .:/weather_app
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     environment:
       - RAILS_ENV=development
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/weather_app_development
-      - REDIS_URL=redis://redis:6379/0
-      - OPENWEATHERMAP_API_KEY=${OPENWEATHERMAP_API_KEY}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/weather_app_production
+      - REDIS_URL=keydb://keydb:6379/0
 
 volumes:
   postgres_data:
-  redis_data:
+  keydb_data:
