@@ -60,13 +60,20 @@ class WeatherController < ApplicationController
     request["User-Agent"] = "weather-script (your-email@example.com)"
 
     response = http.request(request)
-    data = JSON.parse(response.body)
 
     return nil if response.code != "200"
-    data["properties"]["forecast"]
+
+    begin
+      data = JSON.parse(response.body)
+      data["properties"]["forecast"]
+    rescue JSON::ParserError
+      nil
+    end
   end
 
   def get_weather_forecast(forecast_url)
+    return nil unless forecast_url.present? && forecast_url.start_with?("http")
+
     uri = URI(forecast_url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
@@ -74,35 +81,17 @@ class WeatherController < ApplicationController
     request["User-Agent"] = "weather-script (your-email@example.com)"
 
     response = http.request(request)
-    data = JSON.parse(response.body)
-
     return nil if response.code != "200"
-    data["properties"]["periods"]
+
+    begin
+      data = JSON.parse(response.body)
+      data["properties"]["periods"]
+    rescue JSON::ParserError
+      nil
+    end
   end
 
   def extract_weather_data(periods)
-    # limit to 4 days, today + 3 days
-    # if a period looks like this:
-    # {
-    #   "number": 3,
-    #   "name": "Thursday",
-    #   "startTime": "2025-04-10T06:00:00-05:00",
-    #   "endTime": "2025-04-10T18:00:00-05:00",
-    #   "isDaytime": true,
-    #   "temperature": 68,
-    #   "temperatureUnit": "F",
-    #   "temperatureTrend": "",
-    #   "probabilityOfPrecipitation": {
-    #     "unitCode": "wmoUnit:percent",
-    #     "value": null
-    #   },
-    #   "windSpeed": "10 to 25 mph",
-    #   "windDirection": "NW",
-    #   "icon": "https://api.weather.gov/icons/land/day/wind_few?size=medium",
-    #   "shortForecast": "Sunny",
-    #   "detailedForecast": "Sunny, with a high near 68. Northwest wind 10 to 25 mph, with gusts as high as 35 mph."
-    # },
-    # parse the startTime to get the date and use that date to get the next 3 days
     daytime_periods = periods.select { |p| p["isDaytime"] == true }
     evening_periods = periods.select { |p| p["isDaytime"] == false }.map do |period|
       {
@@ -133,8 +122,8 @@ class WeatherController < ApplicationController
   end
 
   def low_for_day(start_time, evening_periods)
-    evening_periods.find do |period|
+    (evening_periods.find do |period|
       DateTime.parse(period[:startTime]).at_beginning_of_day == DateTime.parse(start_time).at_beginning_of_day
-    end[:low]
+    end || {})[:low]
   end
 end
