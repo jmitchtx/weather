@@ -27,6 +27,8 @@ services:
       - RAILS_ENV=development
       - DATABASE_URL=postgres://postgres:postgres@db:5432/weather_app_production
       - REDIS_URL=keydb://keydb:6379/0
+    volumes:
+      - .:/rails
 
 volumes:
   postgres_data:

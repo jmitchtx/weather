@@ -1,0 +1,53 @@
+
+<div class="container">
+  <h1>Weather Forecast</h1>
+
+  <%= form_with url: weather_index_path, method: :get do |form| %>
+    <div class="field">
+      <%= form.label :address, "Enter Address:" %>
+      <br/>
+      <%= form.text_area :address, value: @address, cols: 55, rows: 5 %>
+    </div>
+    <%= form.submit "Get Weather" %>
+  <% end %>
+
+  <% if @weather_data %>
+    <div class="weather-results">
+      <% @weather_data.each do |data| %>
+        <div class="forecast-day">
+          <!-- Day of the week and date -->
+          <div class="day">
+            <%= data[:day] %> <%= data[:date] %>
+          </div>
+          <!-- High/Low Temperature -->
+          <div class="temp">
+            <%= data[:high] %>°/<%= data[:low] %>°
+          </div>
+          <!-- Weather Condition with Icon -->
+          <div class="condition">
+            <img src="<%= data[:weather_icon] %>" alt="Weather Icon" class="weather-icon">
+            <%= data[:description] %>
+          </div>
+          <!-- Precipitation Chance -->
+          <div class="precipitation">
+            <%= data[:precipitation] %>
+          </div>
+          <!-- Wind Speed and Direction with Icon -->
+          <div class="wind">
+            <%= data[:wind_speed] %>
+            <img src="<%= data[:wind_icon] %>" alt="Wind Icon" class="weather-icon">
+            <%= data[:wind_direction] %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <% if @from_cache %>
+      <p class="cache-notice">
+        * Results from cache (valid for 30 minutes)
+        <%= link_to "Bust Cache!", weather_index_path(address: @address, force: true), method: :get %>
+      </p>
+    <% end %>
+  <% elsif @address.present? %>
+    <p class="error">Could not retrieve weather data for that address.</p>
+  <% end %>
+</div>

@@ -1,0 +1,90 @@
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  font-family: Arial, sans-serif; /* Match the clean font style */
+}
+
+.field {
+  margin: 10px 0;
+}
+
+input[type="text"],
+textarea {
+  width: 300px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.weather-results {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9; /* Light background for contrast */
+}
+
+.forecast-day {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #e0e0e0; /* Separator between days */
+}
+
+.forecast-day:last-child {
+  border-bottom: none; /* Remove border for the last day */
+}
+
+.forecast-day div {
+  flex: 1;
+  text-align: center;
+}
+
+.forecast-day .day {
+  flex: 0.5; /* Smaller width for the day */
+  font-weight: bold;
+}
+
+.forecast-day .temp {
+  flex: 1;
+  font-size: 1.1em;
+}
+
+.forecast-day .condition {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px; /* Space between icon and text */
+}
+
+.forecast-day .precipitation {
+  flex: 0.8;
+  color: #1e90ff; /* Blue for precipitation */
+}
+
+.forecast-day .wind {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px; /* Space between icon and text */
+}
+
+.weather-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.cache-notice {
+  color: #666;
+  font-style: italic;
+  margin-top: 10px;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+}
