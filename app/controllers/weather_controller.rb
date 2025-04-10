@@ -92,24 +92,17 @@ class WeatherController < ApplicationController
   end
 
   def extract_weather_data(periods)
-    daytime_periods = periods.select { |p| p["isDaytime"] == true }
-    evening_periods = periods.select { |p| p["isDaytime"] == false }.map do |period|
+    time_periods = periods.select { |p| p["isDaytime"] == false }
+    time_periods.select { |p| within_3_days(p) }.map do |period|
       {
-        startTime: period["startTime"],
-        low: period["temperature"]
-      }
-    end
-
-    daytime_periods.select { |p| within_3_days(p) }.map do |period|
-      {
-        name: period["name"] == "This Afternoon" ? "Today" : period["name"],
+        name: [ "This Afternoon", "Tonight" ].include?(period["name"]) ? "Today" : period["name"],
         day: DateTime.parse(period["startTime"]).strftime("%D"),
         current_temp: period["temperature"],
         wind_speed: period["windSpeed"],
         wind_direction: period["windDirection"],
         wind_icon: period["icon"],
-        high: period["temperature"],
-        low: low_for_day(period["startTime"], evening_periods),
+        high: high_for_day(period["startTime"], periods),
+        low: period["temperature"],
         temp_unit: period["temperatureUnit"],
         description: period["shortForecast"]
       }
@@ -121,9 +114,10 @@ class WeatherController < ApplicationController
     start_time <= (DateTime.now + 3)
   end
 
-  def low_for_day(start_time, evening_periods)
-    (evening_periods.find do |period|
-      DateTime.parse(period[:startTime]).at_beginning_of_day == DateTime.parse(start_time).at_beginning_of_day
-    end || {})[:low]
+  def high_for_day(start_time, periods)
+    (periods.detect do |period|
+      period["isDaytime"] &&  # Check if it's daytime
+      DateTime.parse(period["startTime"]).at_beginning_of_day == DateTime.parse(start_time).at_beginning_of_day
+    end || {})["temperature"]
   end
 end

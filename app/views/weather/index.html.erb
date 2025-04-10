@@ -25,7 +25,7 @@
                     <%= data[:day] %>
                 </td>
                 <td class="temp">
-                    <b><%= data[:high] %>°</b>/<%= data[:low] %>° <%= data[:temp_unit] %>
+                    <b><%= data[:high] ? %{#{data[:high]}°/} : "" %></b><%= data[:low] %>° <%= data[:temp_unit] %>
                 </td>
                 <td class="wind">
                     <%= data[:wind_speed] %>
